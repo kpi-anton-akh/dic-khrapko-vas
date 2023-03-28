@@ -1,7 +1,7 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { dirname } from 'path';
+import { join } from 'path';
 
 /**
  * [description]
@@ -22,8 +22,8 @@ import { dirname } from 'path';
         dropSchema: configService.get('TYPEORM_DROP_SCHEMA'),
         synchronize: configService.get('TYPEORM_SYNCHRONIZE'),
         migrationsRun: configService.get('TYPEORM_MIGRATIONS_RUN'),
-        entities: [dirname(__dirname) + '/modules/**/*.entity.{ts,js}'],
-        migrations: [__dirname + '/migrations/*.{ts,js}'],
+        entities: [join(__dirname, '../../modules/**/*.entity.{ts,js}')],
+        migrations: [join(__dirname, 'migrations/*.{ts,js}')],
       }),
       imports: [ConfigModule],
       inject: [ConfigService],

@@ -24,6 +24,11 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "husky install"
   },
+  "overrides": {
+    "typeorm": {
+      "glob": "7.2.3"
+    }
+  },
   "dependencies": {
     "@fastify/static": "^6.9.0",
     "@nestjs/common": "^9.0.0",
