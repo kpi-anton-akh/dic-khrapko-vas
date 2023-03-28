@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { FilmsModule } from './modules/films';
 import { DatabaseModule } from './systems/database';
 
 @Module({
@@ -8,8 +9,7 @@ import { DatabaseModule } from './systems/database';
       envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
     DatabaseModule,
+    FilmsModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}
