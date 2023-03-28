@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ErrorMessageEnum } from 'src/common/enums';
+import { ErrorMessageEnum } from '../../common/enums';
 import {
   FindManyOptions,
   FindOneOptions,

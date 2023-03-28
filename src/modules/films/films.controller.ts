@@ -13,7 +13,7 @@ import {
 import { FilmsService } from './films.service';
 import { CreateFilmDto, UpdateFilmDto } from './dto';
 import { FilmEntity } from './entities';
-import { IdDto } from 'src/common/dto';
+import { IdDto } from '../../common/dto';
 
 @ApiTags('films')
 @Controller('films')
