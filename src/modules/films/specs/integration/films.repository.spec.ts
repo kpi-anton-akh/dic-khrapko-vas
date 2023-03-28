@@ -134,94 +134,94 @@ describe('FilmsRepository integration tests', () => {
         NotFoundException,
       );
     });
+  });
 
-    describe('updateOne', () => {
-      it('should return updated FilmEntity', async () => {
-        const filmToCreate = {
-          id: '739e0c90-f56f-4809-93b2-4ca461347d79',
-          name: 'Test repository film name 6',
-          genre: FilmGenreEnum.ACTION,
-          description: 'description',
-          rating: 4.74,
-          releaseYear: 1990,
-        } as FilmEntity;
-        await repository.createOne(filmToCreate);
+  describe('updateOne', () => {
+    it('should return updated FilmEntity', async () => {
+      const filmToCreate = {
+        id: '739e0c90-f56f-4809-93b2-4ca461347d79',
+        name: 'Test repository film name 6',
+        genre: FilmGenreEnum.ACTION,
+        description: 'description',
+        rating: 4.74,
+        releaseYear: 1990,
+      } as FilmEntity;
+      await repository.createOne(filmToCreate);
 
-        const received = await repository.updateOne(
-          { id: filmToCreate.id },
-          { description: 'New description' },
-        );
+      const received = await repository.updateOne(
+        { id: filmToCreate.id },
+        { description: 'New description' },
+      );
 
-        expect(received).toBeInstanceOf(FilmEntity);
-        expect(received.id).toBe(filmToCreate.id);
-        expect(received.description).not.toBe(filmToCreate.description);
-        expect(received.description).toBe('New description');
-      });
-
-      it('should return Invalid data error when trying to update an entity to an invalid one', async () => {
-        const filmToCreate = {
-          id: '8c0d09a6-0a25-404c-a8ba-32fcf81b01c7',
-          name: 'Test repository film name 7',
-          genre: FilmGenreEnum.ACTION,
-          description: 'description',
-          rating: 4.74,
-          releaseYear: 1990,
-        } as FilmEntity;
-        await repository.createOne(filmToCreate);
-        const error = new BadRequestException(ErrorMessageEnum.INVALID_DATA);
-
-        await expect(() =>
-          repository.updateOne({ id: filmToCreate.id }, { genre: null }),
-        ).rejects.toThrow(error);
-        await expect(() =>
-          repository.updateOne({ id: filmToCreate.id }, { genre: null }),
-        ).rejects.toThrow(BadRequestException);
-      });
-
-      it('should return Not Found exception when no entity was found to update', async () => {
-        const error = new NotFoundException(ErrorMessageEnum.FILM_NOT_FOUND);
-
-        await expect(() =>
-          repository.updateOne({ id: '' }, {}),
-        ).rejects.toThrow(error);
-        await expect(() =>
-          repository.updateOne({ id: '' }, {}),
-        ).rejects.toThrow(NotFoundException);
-      });
+      expect(received).toBeInstanceOf(FilmEntity);
+      expect(received.id).toBe(filmToCreate.id);
+      expect(received.description).not.toBe(filmToCreate.description);
+      expect(received.description).toBe('New description');
     });
 
-    describe('removeOne', () => {
-      it('should return removed FilmEntity', async () => {
-        const filmToCreate = {
-          id: '7efd5ac2-f68e-4004-826c-b1d900f7a126',
-          name: 'Test repository film name 8',
-          genre: FilmGenreEnum.ACTION,
-          description: 'description',
-          rating: 4.74,
-          releaseYear: 1990,
-        } as FilmEntity;
-        await repository.createOne(filmToCreate);
+    it('should return Invalid data error when trying to update an entity to an invalid one', async () => {
+      const filmToCreate = {
+        id: '8c0d09a6-0a25-404c-a8ba-32fcf81b01c7',
+        name: 'Test repository film name 7',
+        genre: FilmGenreEnum.ACTION,
+        description: 'description',
+        rating: 4.74,
+        releaseYear: 1990,
+      } as FilmEntity;
+      await repository.createOne(filmToCreate);
+      const error = new BadRequestException(ErrorMessageEnum.INVALID_DATA);
 
-        const received = await repository.removeOne({ id: filmToCreate.id });
+      await expect(() =>
+        repository.updateOne({ id: filmToCreate.id }, { genre: null }),
+      ).rejects.toThrow(error);
+      await expect(() =>
+        repository.updateOne({ id: filmToCreate.id }, { genre: null }),
+      ).rejects.toThrow(BadRequestException);
+    });
 
-        expect(received).toBeInstanceOf(FilmEntity);
-        expect(received.id).toBe(undefined);
-        expect(received.name).toBe(filmToCreate.name);
-        expect(received.genre).toBe(filmToCreate.genre);
-        expect(received.name).toBe(filmToCreate.name);
-        expect(received.description).toBe(filmToCreate.description);
-      });
+    it('should return Not Found exception when no entity was found to update', async () => {
+      const error = new NotFoundException(ErrorMessageEnum.FILM_NOT_FOUND);
 
-      it('should return Not Found exception when no entity was found to remove', async () => {
-        const error = new NotFoundException(ErrorMessageEnum.FILM_NOT_FOUND);
+      await expect(() => repository.updateOne({ id: '' }, {})).rejects.toThrow(
+        error,
+      );
+      await expect(() => repository.updateOne({ id: '' }, {})).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
 
-        await expect(() => repository.removeOne({ id: '' })).rejects.toThrow(
-          error,
-        );
-        await expect(() => repository.removeOne({ id: '' })).rejects.toThrow(
-          NotFoundException,
-        );
-      });
+  describe('removeOne', () => {
+    it('should return removed FilmEntity', async () => {
+      const filmToCreate = {
+        id: '7efd5ac2-f68e-4004-826c-b1d900f7a126',
+        name: 'Test repository film name 8',
+        genre: FilmGenreEnum.ACTION,
+        description: 'description',
+        rating: 4.74,
+        releaseYear: 1990,
+      } as FilmEntity;
+      await repository.createOne(filmToCreate);
+
+      const received = await repository.removeOne({ id: filmToCreate.id });
+
+      expect(received).toBeInstanceOf(FilmEntity);
+      expect(received.id).toBe(undefined);
+      expect(received.name).toBe(filmToCreate.name);
+      expect(received.genre).toBe(filmToCreate.genre);
+      expect(received.name).toBe(filmToCreate.name);
+      expect(received.description).toBe(filmToCreate.description);
+    });
+
+    it('should return Not Found exception when no entity was found to remove', async () => {
+      const error = new NotFoundException(ErrorMessageEnum.FILM_NOT_FOUND);
+
+      await expect(() => repository.removeOne({ id: '' })).rejects.toThrow(
+        error,
+      );
+      await expect(() => repository.removeOne({ id: '' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

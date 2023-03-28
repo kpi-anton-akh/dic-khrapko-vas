@@ -135,94 +135,92 @@ describe('FilmsService integration tests', () => {
         NotFoundException,
       );
     });
+  });
 
-    describe('updateOne', () => {
-      it('should return updated FilmEntity', async () => {
-        const filmToCreate = {
-          id: 'e2aeb976-3c46-4964-be2a-35347c287edc',
-          name: 'Test service film name 6',
-          genre: FilmGenreEnum.ACTION,
-          description: 'description',
-          rating: 4.74,
-          releaseYear: 1990,
-        } as FilmEntity;
-        await service.createOne(filmToCreate);
+  describe('updateOne', () => {
+    it('should return updated FilmEntity', async () => {
+      const filmToCreate = {
+        id: 'e2aeb976-3c46-4964-be2a-35347c287edc',
+        name: 'Test service film name 6',
+        genre: FilmGenreEnum.ACTION,
+        description: 'description',
+        rating: 4.74,
+        releaseYear: 1990,
+      } as FilmEntity;
+      await service.createOne(filmToCreate);
 
-        const received = await service.updateOne(
-          { id: filmToCreate.id },
-          { description: 'New description' },
-        );
+      const received = await service.updateOne(
+        { id: filmToCreate.id },
+        { description: 'New description' },
+      );
 
-        expect(received).toBeInstanceOf(FilmEntity);
-        expect(received.id).toBe(filmToCreate.id);
-        expect(received.description).not.toBe(filmToCreate.description);
-        expect(received.description).toBe('New description');
-      });
-
-      it('should return Invalid data error when trying to update an entity to an invalid one', async () => {
-        const filmToCreate = {
-          id: 'b9fea74e-5caa-4748-9373-8a37c532eb05',
-          name: 'Test service film name 7',
-          genre: FilmGenreEnum.ACTION,
-          description: 'description',
-          rating: 4.74,
-          releaseYear: 1990,
-        } as FilmEntity;
-        await service.createOne(filmToCreate);
-        const error = new BadRequestException(ErrorMessageEnum.INVALID_DATA);
-
-        await expect(() =>
-          service.updateOne({ id: filmToCreate.id }, { genre: null }),
-        ).rejects.toThrow(error);
-        await expect(() =>
-          service.updateOne({ id: filmToCreate.id }, { genre: null }),
-        ).rejects.toThrow(BadRequestException);
-      });
-
-      it('should return Not Found exception when no entity was found to update', async () => {
-        const error = new NotFoundException(ErrorMessageEnum.FILM_NOT_FOUND);
-
-        await expect(() => service.updateOne({ id: '' }, {})).rejects.toThrow(
-          error,
-        );
-        await expect(() => service.updateOne({ id: '' }, {})).rejects.toThrow(
-          NotFoundException,
-        );
-      });
+      expect(received).toBeInstanceOf(FilmEntity);
+      expect(received.id).toBe(filmToCreate.id);
+      expect(received.description).not.toBe(filmToCreate.description);
+      expect(received.description).toBe('New description');
     });
 
-    describe('removeOne', () => {
-      it('should return removed FilmEntity', async () => {
-        const filmToCreate = {
-          id: 'a896b556-90c9-46e3-aef3-920046313e4b',
-          name: 'Test service film name 8',
-          genre: FilmGenreEnum.ACTION,
-          description: 'description',
-          rating: 4.74,
-          releaseYear: 1990,
-        } as FilmEntity;
-        await service.createOne(filmToCreate);
+    it('should return Invalid data error when trying to update an entity to an invalid one', async () => {
+      const filmToCreate = {
+        id: 'b9fea74e-5caa-4748-9373-8a37c532eb05',
+        name: 'Test service film name 7',
+        genre: FilmGenreEnum.ACTION,
+        description: 'description',
+        rating: 4.74,
+        releaseYear: 1990,
+      } as FilmEntity;
+      await service.createOne(filmToCreate);
+      const error = new BadRequestException(ErrorMessageEnum.INVALID_DATA);
 
-        const received = await service.removeOne({ id: filmToCreate.id });
+      await expect(() =>
+        service.updateOne({ id: filmToCreate.id }, { genre: null }),
+      ).rejects.toThrow(error);
+      await expect(() =>
+        service.updateOne({ id: filmToCreate.id }, { genre: null }),
+      ).rejects.toThrow(BadRequestException);
+    });
 
-        expect(received).toBeInstanceOf(FilmEntity);
-        expect(received.id).toBe(undefined);
-        expect(received.name).toBe(filmToCreate.name);
-        expect(received.genre).toBe(filmToCreate.genre);
-        expect(received.name).toBe(filmToCreate.name);
-        expect(received.description).toBe(filmToCreate.description);
-      });
+    it('should return Not Found exception when no entity was found to update', async () => {
+      const error = new NotFoundException(ErrorMessageEnum.FILM_NOT_FOUND);
 
-      it('should return Not Found exception when no entity was found to remove', async () => {
-        const error = new NotFoundException(ErrorMessageEnum.FILM_NOT_FOUND);
+      await expect(() => service.updateOne({ id: '' }, {})).rejects.toThrow(
+        error,
+      );
+      await expect(() => service.updateOne({ id: '' }, {})).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
 
-        await expect(() => service.removeOne({ id: '' })).rejects.toThrow(
-          error,
-        );
-        await expect(() => service.removeOne({ id: '' })).rejects.toThrow(
-          NotFoundException,
-        );
-      });
+  describe('removeOne', () => {
+    it('should return removed FilmEntity', async () => {
+      const filmToCreate = {
+        id: 'a896b556-90c9-46e3-aef3-920046313e4b',
+        name: 'Test service film name 8',
+        genre: FilmGenreEnum.ACTION,
+        description: 'description',
+        rating: 4.74,
+        releaseYear: 1990,
+      } as FilmEntity;
+      await service.createOne(filmToCreate);
+
+      const received = await service.removeOne({ id: filmToCreate.id });
+
+      expect(received).toBeInstanceOf(FilmEntity);
+      expect(received.id).toBe(undefined);
+      expect(received.name).toBe(filmToCreate.name);
+      expect(received.genre).toBe(filmToCreate.genre);
+      expect(received.name).toBe(filmToCreate.name);
+      expect(received.description).toBe(filmToCreate.description);
+    });
+
+    it('should return Not Found exception when no entity was found to remove', async () => {
+      const error = new NotFoundException(ErrorMessageEnum.FILM_NOT_FOUND);
+
+      await expect(() => service.removeOne({ id: '' })).rejects.toThrow(error);
+      await expect(() => service.removeOne({ id: '' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });
