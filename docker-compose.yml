@@ -1,35 +1,49 @@
 version: '3.8'
 services:
-  db:
-    image: postgres:14-alpine
+  server:
+    build:
+      context: .
     ports:
-      - '5432:5432'
+      - '8080:8080'
     networks:
       - network
     volumes:
-      - 'db:/var/lib/postgresql/data'
-    environment:
-      - POSTGRES_USER=dic
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=dic
+      - 'server_data:/app/static'
+    # depends_on:
+    #   - db
+    #   - db-test
 
-  db-test:
-    image: postgres:14-alpine
-    ports:
-      - '5434:5432'
-    networks:
-      - network
-    volumes:
-      - 'db-test:/var/lib/postgresql/data'
-    environment:
-      - POSTGRES_USER=dic
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=dic-test
+  # db:
+  #   image: postgres:14-alpine
+  #   ports:
+  #     - '5432:5432'
+  #   networks:
+  #     - network
+  #   volumes:
+  #     - 'db:/var/lib/postgresql/data'
+  #   environment:
+  #     - POSTGRES_USER=dic
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=dic
+
+  # db-test:
+  #   image: postgres:14-alpine
+  #   ports:
+  #     - '5434:5432'
+  #   networks:
+  #     - network
+  #   volumes:
+  #     - 'db-test:/var/lib/postgresql/data'
+  #   environment:
+  #     - POSTGRES_USER=dic
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=dic-test
 
 networks:
   network:
     driver: bridge
 
 volumes:
+  server_data:
   db:
   db-test:

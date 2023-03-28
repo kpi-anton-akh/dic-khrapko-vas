@@ -16,17 +16,19 @@ RUN npm run build
 
 FROM node:18-alpine3.16
 
+ENV NODE_ENV=production
+
 RUN apk add --no-cache tini
 
 ENTRYPOINT ["/sbin/tini", "--"]
 
 WORKDIR /app
 
-COPY --from=build /app/*.env /app/package*.json ./
+COPY --from=build /app/.env.${NODE_ENV} /app/package*.json ./
 
 RUN npm ci --production
 
-COPY --from=build /app/dist ./src/
+COPY --from=build /app/dist ./dist
 
-CMD ["node", "./src/main.js"]
+CMD ["npm", "run", "start:prod"]
   
