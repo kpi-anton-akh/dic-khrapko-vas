@@ -3,9 +3,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 
-/**
- * [description]
- */
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -19,6 +16,9 @@ import { join } from 'path';
         database: configService.get<string>('TYPEORM_DATABASE'),
         username: configService.get('TYPEORM_USERNAME'),
         password: configService.get('TYPEORM_PASSWORD'),
+        extra: {
+          ssl: configService.get('TYPEORM_SSL'),
+        },
         dropSchema: configService.get('TYPEORM_DROP_SCHEMA'),
         synchronize: configService.get('TYPEORM_SYNCHRONIZE'),
         migrationsRun: configService.get('TYPEORM_MIGRATIONS_RUN'),
