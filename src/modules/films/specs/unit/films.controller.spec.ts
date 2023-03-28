@@ -20,11 +20,11 @@ describe('FilmsController unit tests', () => {
         {
           provide: FilmsService,
           useValue: {
-            createOne: (entity: Partial<FilmEntity>) =>
+            createOne: async (entity: Partial<FilmEntity>) =>
               plainToInstance(FilmEntity, { ...entity, ...filmEntity }),
-            findAll: () => [filmEntity],
-            findOne: () => filmEntity,
-            updateOne: (
+            findAll: async () => [filmEntity],
+            findOne: async () => filmEntity,
+            updateOne: async (
               conditions: Partial<FilmEntity>,
               entity: Partial<FilmEntity>,
             ) =>
@@ -33,7 +33,7 @@ describe('FilmsController unit tests', () => {
                 ...filmEntity,
                 ...entity,
               }),
-            removeOne: () => new FilmEntity(),
+            removeOne: async () => new FilmEntity(),
           },
         },
       ],
