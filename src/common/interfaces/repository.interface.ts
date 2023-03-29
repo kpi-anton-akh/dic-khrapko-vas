@@ -1,11 +1,6 @@
-import {
-  BaseEntity,
-  FindManyOptions,
-  FindOneOptions,
-  FindOptionsWhere,
-} from 'typeorm';
+import { FindManyOptions, FindOneOptions, FindOptionsWhere } from 'typeorm';
 
-export interface IRepository<Entity extends BaseEntity> {
+export interface IRepository<Entity> {
   createOne(entity: Partial<Entity>): Promise<Entity>;
   findAll(options?: FindManyOptions<Entity>): Promise<Entity[]>;
   findOne(
