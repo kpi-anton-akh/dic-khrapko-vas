@@ -12,9 +12,10 @@ import {
   Repository,
 } from 'typeorm';
 import { FilmEntity } from './entities';
+import { IRepository } from 'src/common/interfaces';
 
 @Injectable()
-export class FilmsRepository {
+export class FilmsRepository implements IRepository<FilmEntity> {
   constructor(
     @InjectRepository(FilmEntity)
     public readonly filmEntityRepository: Repository<FilmEntity>,
