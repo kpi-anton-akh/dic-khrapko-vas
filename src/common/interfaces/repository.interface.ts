@@ -7,9 +7,6 @@ export interface IRepository<Entity> {
     conditions: FindOptionsWhere<Entity>,
     options?: FindOneOptions<Entity>,
   ): Promise<Entity>;
-  updateOne(
-    conditions: FindOptionsWhere<Entity>,
-    entity: Partial<Entity>,
-  ): Promise<Entity>;
-  removeOne(conditions: FindOptionsWhere<Entity>): Promise<Entity>;
+  updateOne(entityToUpdate: Entity, entity: Partial<Entity>): Promise<Entity>;
+  removeOne(entity: Entity): Promise<Entity>;
 }
