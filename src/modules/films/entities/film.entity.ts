@@ -74,16 +74,12 @@ export class FilmEntity {
   @ApiProperty({ readOnly: true })
   @CreateDateColumn({
     readonly: true,
-    type: 'timestamptz',
-    default: () => 'NOW()',
   })
   public readonly createdAt: Date;
 
   @ApiProperty({ readOnly: true })
   @UpdateDateColumn({
     readonly: true,
-    type: 'timestamptz',
-    default: () => 'NOW()',
   })
   public readonly updatedAt: Date;
 }
