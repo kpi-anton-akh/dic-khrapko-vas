@@ -1,16 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  FindManyOptions,
-  FindOneOptions,
-  FindOptionsWhere,
-  Repository,
-} from 'typeorm';
+import { Repository } from 'typeorm';
 import { FilmEntity } from './entities';
-import { IRepository } from 'src/common/interfaces';
+import { IFilmsRepository } from './interfaces';
+import { IFindConditions } from 'src/common/interfaces';
 
 @Injectable()
-export class FilmsRepository implements IRepository<FilmEntity> {
+export class FilmsRepository implements IFilmsRepository {
   constructor(
     @InjectRepository(FilmEntity)
     public readonly filmEntityRepository: Repository<FilmEntity>,
@@ -21,18 +17,14 @@ export class FilmsRepository implements IRepository<FilmEntity> {
     return this.filmEntityRepository.save(entityToSave);
   }
 
-  public async findAll(
-    options: FindManyOptions<FilmEntity> = { loadEagerRelations: false },
-  ): Promise<FilmEntity[]> {
-    return this.filmEntityRepository.find(options);
+  public async findAll(): Promise<FilmEntity[]> {
+    return this.filmEntityRepository.find();
   }
 
   public async findOne(
-    conditions: FindOptionsWhere<FilmEntity>,
-    options: FindOneOptions<FilmEntity> = { loadEagerRelations: false },
+    conditions: IFindConditions<FilmEntity>,
   ): Promise<FilmEntity> {
     return this.filmEntityRepository.findOne({
-      ...options,
       where: conditions,
     });
   }
