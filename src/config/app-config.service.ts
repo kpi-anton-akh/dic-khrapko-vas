@@ -49,7 +49,7 @@ export class AppConfigService {
   getSqliteConfig(): TypeOrmModuleOptions {
     return {
       type: this.configService.get<'sqlite'>('TYPEORM_TYPE'),
-      database: this.configService.get<string>('TYPEORM_TYPE'),
+      database: this.configService.get<string>('TYPEORM_DATABASE'),
       cache: convertBoolStrToBoolean(this.get('TYPEORM_CACHE')),
       logging: this.get('TYPEORM_LOGGING'),
       dropSchema: convertBoolStrToBoolean(this.get('TYPEORM_DROP_SCHEMA')),
