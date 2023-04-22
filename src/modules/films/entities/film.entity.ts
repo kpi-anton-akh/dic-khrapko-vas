@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   Entity,
-  BaseEntity,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
@@ -10,7 +9,7 @@ import {
 import { FilmGenreEnum } from '../enums';
 
 @Entity('films')
-export class FilmEntity extends BaseEntity {
+export class FilmEntity {
   @ApiProperty({ readOnly: true })
   @PrimaryGeneratedColumn('uuid')
   public readonly id: string;
