@@ -10,21 +10,6 @@ jobs:
   lint-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres
-        ports:
-          - 5434:5432
-        env:
-          POSTGRES_DB: dic-test
-          POSTGRES_USER: dic
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
