@@ -1,15 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { FilmsModule } from './modules/films';
 import { DatabaseModule } from './systems/database';
+import { AppConfigModule } from './config';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV}`,
-    }),
-    DatabaseModule,
-    FilmsModule,
-  ],
+  imports: [AppConfigModule, DatabaseModule, FilmsModule],
 })
 export class AppModule {}
