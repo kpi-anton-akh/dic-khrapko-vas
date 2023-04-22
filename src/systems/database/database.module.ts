@@ -20,9 +20,15 @@ import { convertBoolStrToBoolean } from '../../common/helpers';
         extra: {
           ssl: convertBoolStrToBoolean(configService.get('TYPEORM_SSL')),
         },
-        dropSchema: configService.get('TYPEORM_DROP_SCHEMA'),
-        synchronize: configService.get('TYPEORM_SYNCHRONIZE'),
-        migrationsRun: configService.get('TYPEORM_MIGRATIONS_RUN'),
+        dropSchema: convertBoolStrToBoolean(
+          configService.get('TYPEORM_DROP_SCHEMA'),
+        ),
+        synchronize: convertBoolStrToBoolean(
+          configService.get('TYPEORM_SYNCHRONIZE'),
+        ),
+        migrationsRun: convertBoolStrToBoolean(
+          configService.get('TYPEORM_MIGRATIONS_RUN'),
+        ),
         entities: [join(__dirname, '../../modules/**/*.entity.{ts,js}')],
         migrations: [join(__dirname, 'migrations/*.{ts,js}')],
       }),
