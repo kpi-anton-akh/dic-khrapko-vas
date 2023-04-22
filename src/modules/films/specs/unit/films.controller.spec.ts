@@ -1,16 +1,22 @@
-import { plainToInstance } from 'class-transformer';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FilmsController } from '../../films.controller';
 import { FilmsService } from '../../films.service';
 import { CreateFilmDto, UpdateFilmDto } from '../../dto';
 import { FilmEntity } from '../../entities';
+import { FilmGenreEnum } from '../../enums';
 
 describe('FilmsController unit tests', () => {
   let controller: FilmsController;
 
   const createOneDto = new CreateFilmDto();
   const updateOneDto = new UpdateFilmDto();
-  const filmEntity = new FilmEntity();
+  const filmEntity = {
+    id: 'fa27a0f1-0c8f-4c3e-8f27-f6f854454036',
+    name: 'films controller test entity',
+    genre: FilmGenreEnum.ACTION,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as FilmEntity;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,19 +26,10 @@ describe('FilmsController unit tests', () => {
         {
           provide: FilmsService,
           useValue: {
-            createOne: async (entity: Partial<FilmEntity>) =>
-              plainToInstance(FilmEntity, { ...entity, ...filmEntity }),
+            createOne: async () => filmEntity,
             findAll: async () => [filmEntity],
             findOne: async () => filmEntity,
-            updateOne: async (
-              conditions: Partial<FilmEntity>,
-              entity: Partial<FilmEntity>,
-            ) =>
-              plainToInstance(FilmEntity, {
-                ...conditions,
-                ...filmEntity,
-                ...entity,
-              }),
+            updateOne: async () => filmEntity,
             removeOne: async () => new FilmEntity(),
           },
         },
@@ -49,31 +46,35 @@ describe('FilmsController unit tests', () => {
   describe('createOne', () => {
     it('should return created FilmEntity', async () => {
       const received = await controller.createOne(createOneDto);
-      expect(received).toBeInstanceOf(FilmEntity);
+
+      expect(received).toEqual(filmEntity);
     });
   });
 
   describe('findAll', () => {
     it('should return array of found FilmEntities', async () => {
+      const expected = [filmEntity];
+
       const received = await controller.findAll();
+
       expect(Array.isArray(received)).toBe(true);
-      for (const entity of received) {
-        expect(entity).toBeInstanceOf(FilmEntity);
-      }
+      expect(received).toEqual(expected);
     });
   });
 
   describe('findOne', () => {
     it('should return found FilmEntity', async () => {
       const received = await controller.findOne(filmEntity);
-      expect(received).toBeInstanceOf(FilmEntity);
+
+      expect(received).toEqual(filmEntity);
     });
   });
 
   describe('updateOne', () => {
     it('should return updated FilmEntity', async () => {
       const received = await controller.updateOne(filmEntity, updateOneDto);
-      expect(received).toBeInstanceOf(FilmEntity);
+
+      expect(received).toEqual(filmEntity);
     });
   });
 
