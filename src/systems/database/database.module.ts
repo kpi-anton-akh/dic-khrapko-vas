@@ -1,39 +1,15 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { join } from 'path';
-import { convertBoolStrToBoolean } from '../../common/helpers';
+import { AppConfigModule } from 'src/config';
+import { AppConfigService } from 'src/config/app-config.service';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      useFactory: (configService: ConfigService) => ({
-        type: configService.get<'postgres'>('TYPEORM_TYPE'),
-        name: configService.get('TYPEORM_NAME'),
-        host: configService.get('TYPEORM_HOST'),
-        port: configService.get('TYPEORM_PORT'),
-        cache: convertBoolStrToBoolean(configService.get('TYPEORM_CACHE')),
-        logging: configService.get('TYPEORM_LOGGING'),
-        database: configService.get<string>('TYPEORM_DATABASE'),
-        username: configService.get('TYPEORM_USERNAME'),
-        password: configService.get('TYPEORM_PASSWORD'),
-        extra: {
-          ssl: convertBoolStrToBoolean(configService.get('TYPEORM_SSL')),
-        },
-        dropSchema: convertBoolStrToBoolean(
-          configService.get('TYPEORM_DROP_SCHEMA'),
-        ),
-        synchronize: convertBoolStrToBoolean(
-          configService.get('TYPEORM_SYNCHRONIZE'),
-        ),
-        migrationsRun: convertBoolStrToBoolean(
-          configService.get('TYPEORM_MIGRATIONS_RUN'),
-        ),
-        entities: [join(__dirname, '../../modules/**/*.entity.{ts,js}')],
-        migrations: [join(__dirname, 'migrations/*.{ts,js}')],
-      }),
-      imports: [ConfigModule],
-      inject: [ConfigService],
+      useFactory: (appConfigService: AppConfigService) =>
+        appConfigService.getDbConfig(),
+      imports: [AppConfigModule],
+      inject: [AppConfigService],
     }),
   ],
 })
