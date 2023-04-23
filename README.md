@@ -7,6 +7,8 @@
 - Documentation: Swagger
 - Testign: Jest
 
+[**Project CI**](https://github.com/kpi-anton-akh/dic-khrapko-vas/actions) using GitHub Actions
+
 ## Installation
 
 Make sure you have [Node.js](http://nodejs.org/) installed.
