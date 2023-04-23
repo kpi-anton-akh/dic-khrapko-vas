@@ -1,3 +1,5 @@
+(https://github.com/kpi-anton-akh/dic-khrapko-vas/actions)
+
 ### Built with
 
 - Runtime environment: Node.js
@@ -6,6 +8,8 @@
 - Cloud Services: Azure Database for PostgreSQL servers
 - Documentation: Swagger
 - Testign: Jest
+
+[**Project CI using GitHub Actions**](https://github.com/kpi-anton-akh/dic-khrapko-vas/actions)
 
 ## Installation
 
