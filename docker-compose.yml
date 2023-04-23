@@ -45,5 +45,5 @@ networks:
 
 volumes:
   server_data:
-  db:
-  db-test:
+  # db:
+  # db-test:
