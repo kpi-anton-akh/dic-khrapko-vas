@@ -51,7 +51,7 @@ jobs:
       - name: Zip all files for upload between jobs
         run: zip --symlinks -r nest.zip ./*
 
-      - name: Delete old artifacts
+      - name: Delete Old Artifacts
         uses: actions/github-script@v6
         id: artifact
         with:
@@ -62,6 +62,7 @@ jobs:
             })
 
             res.data.artifacts
+              .filter(({ name }) => name === 'package')
               .forEach(({ id }) => {
                 github.rest.actions.deleteArtifact({
                   owner: context.repo.owner,
