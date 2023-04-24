@@ -51,12 +51,6 @@ jobs:
       - name: Zip all files for upload between jobs
         run: zip --symlinks -r nest.zip ./*
 
-      - name: Delete Old Artifacts
-        uses: kolpav/purge-artifacts-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          expire-in: 0days
-
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
