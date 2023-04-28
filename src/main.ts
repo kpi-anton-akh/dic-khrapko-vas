@@ -35,7 +35,7 @@ async function bootstrap() {
     SwaggerModule.setup(SWAGGER_DOCS_PATH, app, document);
   }
 
-  app.useGlobalPipes(validationPipe);
+  app.useGlobalPipes(validationPipe).enableCors();
 
   await app.listen(PORT, HOST, () => {
     console.log(`Server listens on http://${HOST}:${PORT}`);
