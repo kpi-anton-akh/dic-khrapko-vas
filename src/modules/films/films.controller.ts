@@ -14,6 +14,7 @@ import { FilmsService } from './films.service';
 import { CreateFilmDto, UpdateFilmDto } from './dto';
 import { FilmEntity } from './entities';
 import { IdDto } from '../../common/dto';
+import { plainToInstance } from 'class-transformer';
 
 @ApiTags('films')
 @Controller('films')
@@ -23,7 +24,9 @@ export class FilmsController {
 
   @Post()
   public async createOne(@Body() dto: CreateFilmDto): Promise<FilmEntity> {
-    return this.filmsService.createOne(dto);
+    const model = plainToInstance(FilmEntity, dto);
+
+    return this.filmsService.createOne(model);
   }
 
   @Get()
@@ -41,7 +44,9 @@ export class FilmsController {
     @Param() conditions: IdDto,
     @Body() dto: UpdateFilmDto,
   ): Promise<FilmEntity> {
-    return this.filmsService.updateOne(conditions, dto);
+    const model = plainToInstance(FilmEntity, dto);
+
+    return this.filmsService.updateOne(conditions, model);
   }
 
   @Delete(':id')
