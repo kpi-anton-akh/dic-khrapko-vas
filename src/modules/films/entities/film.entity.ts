@@ -6,14 +6,17 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Type } from 'class-transformer';
 import { FilmGenreEnum } from '../enums';
 
 @Entity('films')
 export class FilmEntity {
+  @Type(() => String)
   @ApiProperty({ readOnly: true })
   @PrimaryGeneratedColumn('uuid')
   public readonly id: string;
 
+  @Type(() => String)
   @ApiProperty({
     maxLength: 256,
     required: true,
@@ -23,6 +26,7 @@ export class FilmEntity {
   @Column({ type: 'varchar', length: 256, nullable: false })
   public name: string;
 
+  @Type(() => String)
   @ApiProperty({
     maxLength: 500,
     nullable: true,
@@ -32,6 +36,7 @@ export class FilmEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   public description?: string;
 
+  @Type(() => FilmGenreEnum as unknown as () => FilmGenreEnum)
   @ApiProperty({
     enum: FilmGenreEnum,
     required: true,
@@ -40,6 +45,7 @@ export class FilmEntity {
   @Column({ nullable: false, enum: FilmGenreEnum })
   public genre: FilmGenreEnum;
 
+  @Type(() => String)
   @ApiProperty({
     maxLength: 256,
     nullable: true,
@@ -49,6 +55,7 @@ export class FilmEntity {
   @Column({ type: 'varchar', length: 256, nullable: true })
   public authorsNamesInfo?: string;
 
+  @Type(() => Number)
   @ApiProperty({
     type: Number,
     nullable: true,
@@ -62,6 +69,7 @@ export class FilmEntity {
   })
   public readonly rating?: number;
 
+  @Type(() => Number)
   @ApiProperty({
     type: 'integer',
     required: false,
@@ -71,12 +79,14 @@ export class FilmEntity {
   @Column({ type: 'integer', nullable: true })
   public releaseYear?: number;
 
+  @Type(() => Date)
   @ApiProperty({ readOnly: true })
   @CreateDateColumn({
     readonly: true,
   })
   public readonly createdAt: Date;
 
+  @Type(() => Date)
   @ApiProperty({ readOnly: true })
   @UpdateDateColumn({
     readonly: true,
