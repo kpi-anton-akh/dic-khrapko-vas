@@ -72,7 +72,7 @@ describe('FilmsRepository unit tests', () => {
     it('should return updated FilmEntity', async () => {
       const received = await repository.updateOne(filmEntity, {});
 
-      expect(received).toBe(filmEntity);
+      expect(received).toEqual(filmEntity);
     });
   });
 
