@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { FilmEntity } from './entities';
 import { IFilmsRepository } from './interfaces';
 import { IFindConditions } from 'src/common/interfaces';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class FilmsRepository implements IFilmsRepository {
@@ -14,19 +15,25 @@ export class FilmsRepository implements IFilmsRepository {
 
   public async createOne(entity: Partial<FilmEntity>): Promise<FilmEntity> {
     const entityToSave = this.filmEntityRepository.create(entity);
-    return this.filmEntityRepository.save(entityToSave);
+    const createdEntity = await this.filmEntityRepository.save(entityToSave);
+
+    return plainToInstance(FilmEntity, createdEntity);
   }
 
   public async findAll(): Promise<FilmEntity[]> {
-    return this.filmEntityRepository.find();
+    const entities: FilmEntity[] = await this.filmEntityRepository.find();
+
+    return plainToInstance(FilmEntity, entities);
   }
 
   public async findOne(
     conditions: IFindConditions<FilmEntity>,
   ): Promise<FilmEntity> {
-    return this.filmEntityRepository.findOne({
+    const entity = await this.filmEntityRepository.findOne({
       where: conditions,
     });
+
+    return plainToInstance(FilmEntity, entity);
   }
 
   public async updateOne(
@@ -37,10 +44,14 @@ export class FilmsRepository implements IFilmsRepository {
       entityToUpdate,
       entity,
     );
-    return this.filmEntityRepository.save(updatedEntity);
+    const savedEntity = await this.filmEntityRepository.save(updatedEntity);
+
+    return plainToInstance(FilmEntity, savedEntity);
   }
 
   public async removeOne(entity: FilmEntity): Promise<FilmEntity> {
-    return this.filmEntityRepository.remove(entity);
+    const removedEntity = await this.filmEntityRepository.remove(entity);
+
+    return plainToInstance(FilmEntity, removedEntity);
   }
 }
