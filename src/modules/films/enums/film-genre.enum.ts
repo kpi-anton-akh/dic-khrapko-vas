@@ -1,0 +1,11 @@
+export enum FilmGenreEnum {
+  ACTION = 'ACTION',
+  COMEDY = 'COMEDY',
+  DRAMA = 'DRAMA',
+  FANTASY = 'FANTASY',
+  HORROR = 'HORROR',
+  MYSTERY = 'MYSTERY',
+  ROMANCE = 'ROMANCE',
+  THRILLER = 'THRILLER',
+  OTHER = 'OTHER',
+}
