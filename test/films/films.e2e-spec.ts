@@ -7,7 +7,7 @@ import { FilmsModule } from 'src/modules/films';
 import { CreateFilmDto, UpdateFilmDto } from 'src/modules/films/dto';
 import { FilmEntity } from 'src/modules/films/entities';
 import { FilmGenreEnum } from 'src/modules/films/enums';
-import { DatabaseModule } from 'src/systems/database';
+import { SqlDatabaseModule } from 'src/systems/database';
 import { DataSource, Repository } from 'typeorm';
 
 describe('FilmsController endpoints tests', () => {
@@ -20,7 +20,7 @@ describe('FilmsController endpoints tests', () => {
       imports: [
         TypeOrmModule.forFeature([FilmEntity]),
         AppConfigModule,
-        DatabaseModule,
+        SqlDatabaseModule,
         FilmsModule,
       ],
     }).compile();

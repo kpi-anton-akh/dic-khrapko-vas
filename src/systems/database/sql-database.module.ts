@@ -13,4 +13,4 @@ import { AppConfigService } from 'src/config/app-config.service';
     }),
   ],
 })
-export class DatabaseModule {}
+export class SqlDatabaseModule {}
