@@ -7,7 +7,7 @@ import { AppConfigService } from 'src/config/app-config.service';
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: (appConfigService: AppConfigService) =>
-        appConfigService.getDbConfig(),
+        appConfigService.getSqlDbConfig(),
       imports: [AppConfigModule],
       inject: [AppConfigService],
     }),

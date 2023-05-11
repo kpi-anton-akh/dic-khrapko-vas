@@ -17,7 +17,7 @@ export class AppConfigService {
     return this.get('NODE_ENV') === mode;
   }
 
-  public getDbConfig(): TypeOrmModuleOptions {
+  public getSqlDbConfig(): TypeOrmModuleOptions {
     if (this.isMode(NodeModeEnum.TEST)) return this.getSqliteConfig();
     return this.getPostgresConfig();
   }
