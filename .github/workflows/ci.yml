@@ -2,9 +2,7 @@ name: Node.js CI
 
 on:
   push:
-    branches: [main, feat/phase-1/implement-back-end-service-with-crud]
   pull_request:
-    branches: [main, feat/phase-1/implement-back-end-service-with-crud]
 
 jobs:
   build-lint-and-test:
