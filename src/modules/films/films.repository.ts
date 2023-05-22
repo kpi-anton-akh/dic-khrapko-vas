@@ -5,11 +5,12 @@ import { FilmEntity } from './entities';
 import { IFilmsRepository } from './interfaces';
 import { IFindConditions } from 'src/common/interfaces';
 import { plainToInstance } from 'class-transformer';
+import { TYPEORM_CONNECTION_NAME } from 'src/config/app-config.service';
 
 @Injectable()
 export class FilmsRepository implements IFilmsRepository {
   constructor(
-    @InjectRepository(FilmEntity)
+    @InjectRepository(FilmEntity, TYPEORM_CONNECTION_NAME)
     public readonly filmEntityRepository: Repository<FilmEntity>,
   ) {}
 

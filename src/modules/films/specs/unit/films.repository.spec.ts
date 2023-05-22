@@ -3,6 +3,7 @@ import { FilmEntity } from '../../entities';
 import { FilmsRepository } from '../../films.repository';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { FilmGenreEnum } from '../../enums';
+import { TYPEORM_CONNECTION_NAME } from 'src/config/app-config.service';
 
 describe('FilmsRepository unit tests', () => {
   let repository: FilmsRepository;
@@ -21,7 +22,7 @@ describe('FilmsRepository unit tests', () => {
         FilmsRepository,
         // Mocking FilmsEntityRepository provider
         {
-          provide: getRepositoryToken(FilmEntity),
+          provide: getRepositoryToken(FilmEntity, TYPEORM_CONNECTION_NAME),
           useValue: {
             create: () => filmEntity,
             save: async () => filmEntity,

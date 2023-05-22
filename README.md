@@ -3,7 +3,7 @@
 - Runtime environment: Node.js
 - Web framework: Nest.js
 - ORM: TypeORM
-- Cloud Services: Azure Database for PostgreSQL servers
+- Cloud Services: Azure Database for PostgreSQL servers, Azure Cosmos DB for MongoDB account
 - Documentation: Swagger
 - Testign: Jest
 
@@ -32,7 +32,7 @@ npm install
 
 **NOTE**
 
-To run the application in **_<u>production</u>_** mode, it is necessary to replace the value of the **TYPEORM_PASSWORD** parameter in the [config file (.env.production)](.env.production) with the value sent in private messages (Telegram)
+To run the application in **_<u>production</u>_** mode, it is necessary to replace the value of the **TYPEORM_PASSWORD** and **TYPEORM_PASSWORD_NOSQL** parameters in the [config file (.env.production)](.env.production) with the value sent in private messages (Telegram)
 
 ---
 
@@ -62,17 +62,19 @@ Open http://localhost:8080/ to view the API documentation in your browser
 
 ---
 
-To run the application locally in **_<u>development</u>_** mode (with local database running in Docker container):
+To run the application locally in **_<u>development</u>_** mode (with local sql database running in Docker container):
 
 1. Replace the contents of the [docker-compose.yml](docker-compose.yml) file with the contents of the [local.docker-compose.yml](local.docker-compose.yml) file
 
-2. Run development database inside a container:
+2. Replace the value of the **TYPEORM_PASSWORD_NOSQL** parameter in the [config file (.env.development)](.env.development) with the value sent in private messages (Telegram)
+
+3. Run development sql database inside a container:
 
 ```bash
 docker-compose up
 ```
 
-3. Run the app in <u>development</u> mode:
+4. Run the app in <u>development</u> mode:
 
 ```bash
 npm run start

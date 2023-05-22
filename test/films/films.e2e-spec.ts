@@ -1,14 +1,15 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, getConnectionToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { AppConfigModule } from 'src/config';
 import { FilmsModule } from 'src/modules/films';
 import { CreateFilmDto, UpdateFilmDto } from 'src/modules/films/dto';
 import { FilmEntity } from 'src/modules/films/entities';
 import { FilmGenreEnum } from 'src/modules/films/enums';
-import { DatabaseModule } from 'src/systems/database';
+import { SqlDatabaseModule } from 'src/systems/database';
 import { DataSource, Repository } from 'typeorm';
+import { TYPEORM_CONNECTION_NAME } from 'src/config/app-config.service';
 
 describe('FilmsController endpoints tests', () => {
   let app: INestApplication;
@@ -18,13 +19,16 @@ describe('FilmsController endpoints tests', () => {
   beforeAll(async () => {
     const testingModule: TestingModule = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forFeature([FilmEntity]),
+        TypeOrmModule.forFeature([FilmEntity], TYPEORM_CONNECTION_NAME),
         AppConfigModule,
-        DatabaseModule,
+        SqlDatabaseModule,
         FilmsModule,
       ],
     }).compile();
-    dataSource = testingModule.get<DataSource>(DataSource);
+    dataSource = testingModule.get<DataSource>(
+      getConnectionToken(TYPEORM_CONNECTION_NAME),
+    );
+
     dbContext = dataSource.getRepository(FilmEntity);
 
     app = testingModule.createNestApplication();
