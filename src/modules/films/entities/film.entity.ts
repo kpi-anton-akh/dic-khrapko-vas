@@ -7,7 +7,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Type } from 'class-transformer';
-import { FilmGenreEnum } from '../enums';
 
 @Entity('films')
 export class FilmEntity {
@@ -35,15 +34,6 @@ export class FilmEntity {
   })
   @Column({ type: 'varchar', length: 500, nullable: true })
   public description?: string;
-
-  @Type(() => FilmGenreEnum as unknown as () => FilmGenreEnum)
-  @ApiProperty({
-    enum: FilmGenreEnum,
-    required: true,
-    examples: FilmGenreEnum,
-  })
-  @Column({ nullable: false, enum: FilmGenreEnum })
-  public genre: FilmGenreEnum;
 
   @Type(() => String)
   @ApiProperty({

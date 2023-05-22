@@ -6,7 +6,6 @@ import { AppConfigModule } from 'src/config';
 import { FilmsModule } from 'src/modules/films';
 import { CreateFilmDto, UpdateFilmDto } from 'src/modules/films/dto';
 import { FilmEntity } from 'src/modules/films/entities';
-import { FilmGenreEnum } from 'src/modules/films/enums';
 import { SqlDatabaseModule } from 'src/systems/database';
 import { DataSource, Repository } from 'typeorm';
 import { TYPEORM_CONNECTION_NAME } from 'src/config/app-config.service';
@@ -46,7 +45,6 @@ describe('FilmsController endpoints tests', () => {
       {
         id: 'f914f58a-a336-42c8-b318-af2c4a7faa12',
         name: 'Titanic',
-        genre: FilmGenreEnum.DRAMA,
         description:
           'Titanic is a 1997 American epic romance and disaster film directed, written, produced, and co-edited by James Cameron.',
         authorsNamesInfo: 'James Cameron',
@@ -56,7 +54,6 @@ describe('FilmsController endpoints tests', () => {
       {
         id: '5164f275-1d13-492f-a70e-b135d05a3556',
         name: 'The Avengers',
-        genre: FilmGenreEnum.FANTASY,
         description:
           '2012 American superhero film based on the Marvel Comics superhero team of the same name.',
         authorsNamesInfo: 'Joss Whedon',
@@ -77,7 +74,6 @@ describe('FilmsController endpoints tests', () => {
       // Arrange
       const createFilmDto = {
         name: 'Renfield',
-        genre: FilmGenreEnum.HORROR,
         description:
           'In this modern monster tale of Dracula`s loyal servant, Nicholas Hoult stars as Renfield',
         authorsNamesInfo: 'Chris McKay',

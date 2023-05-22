@@ -3,7 +3,6 @@ import { FilmsController } from '../../films.controller';
 import { FilmsService } from '../../films.service';
 import { CreateFilmDto, UpdateFilmDto } from '../../dto';
 import { FilmEntity } from '../../entities';
-import { FilmGenreEnum } from '../../enums';
 
 describe('FilmsController unit tests', () => {
   let controller: FilmsController;
@@ -13,7 +12,6 @@ describe('FilmsController unit tests', () => {
   const filmEntity = {
     id: 'fa27a0f1-0c8f-4c3e-8f27-f6f854454036',
     name: 'films controller test entity',
-    genre: FilmGenreEnum.ACTION,
     createdAt: new Date(),
     updatedAt: new Date(),
   } as FilmEntity;

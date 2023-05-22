@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FilmsService } from '../../films.service';
 import { FilmEntity } from '../../entities';
 import { FilmsRepository } from '../../films.repository';
-import { FilmGenreEnum } from '../../enums';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ErrorMessageEnum } from 'src/common/enums';
 
@@ -13,7 +12,6 @@ describe('FilmsService unit tests', () => {
   const filmEntity = {
     id: '61b37c40-3f0b-4bee-8aae-5a03fdef9faa',
     name: 'films service test entity',
-    genre: FilmGenreEnum.ACTION,
     createdAt: new Date(),
     updatedAt: new Date(),
   } as FilmEntity;
