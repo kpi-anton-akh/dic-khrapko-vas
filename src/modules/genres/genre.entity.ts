@@ -9,8 +9,8 @@ import {
 import { Type } from 'class-transformer';
 import { ObjectID } from 'mongodb';
 
-@Entity('film-genres')
-export class FilmGenreEntity {
+@Entity('genres')
+export class GenreEntity {
   @Type(() => String)
   @ApiProperty({ readOnly: true })
   @ObjectIdColumn({

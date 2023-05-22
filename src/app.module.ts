@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { FilmsModule } from './modules/films';
 import { NosqlDatabaseModule, SqlDatabaseModule } from './systems/database';
 import { AppConfigModule } from './config';
-import { FilmGenresModule } from './modules/film-genres';
+import { GenresModule } from './modules/genres';
 
 @Module({
   imports: [
@@ -10,7 +10,7 @@ import { FilmGenresModule } from './modules/film-genres';
     SqlDatabaseModule,
     NosqlDatabaseModule,
     FilmsModule,
-    FilmGenresModule,
+    GenresModule,
   ],
 })
 export class AppModule {}

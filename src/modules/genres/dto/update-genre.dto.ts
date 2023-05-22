@@ -1,5 +1,5 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { CreateFilmGenreDto } from './create-film-genre.dto';
+import { CreateGenreDto } from './create-genre.dto';
 import {
   IsNotEmpty,
   IsString,
@@ -8,7 +8,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 
-export class UpdateFilmGenreDto extends OmitType(CreateFilmGenreDto, ['name']) {
+export class UpdateGenreDto extends OmitType(CreateGenreDto, ['name']) {
   @ValidateIf((obj, val) => val !== undefined)
   @IsNotEmpty()
   @IsString()

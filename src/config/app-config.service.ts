@@ -4,7 +4,7 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { join } from 'path';
 import { NodeModeEnum } from 'src/common/enums';
 import { convertBoolStrToBoolean } from 'src/common/helpers';
-import { FilmGenreEntity } from 'src/modules/film-genres/film-genre.entity';
+import { GenreEntity } from 'src/modules/genres/genre.entity';
 import { FilmEntity } from 'src/modules/films/entities';
 
 export const TYPEORM_CONNECTION_NAME = 'typeormSqlConnection';
@@ -95,7 +95,7 @@ export class AppConfigService {
       migrationsRun: convertBoolStrToBoolean(
         this.get('TYPEORM_MIGRATIONS_RUN_NOSQL'),
       ),
-      entities: [FilmGenreEntity],
+      entities: [GenreEntity],
     };
   }
 }
