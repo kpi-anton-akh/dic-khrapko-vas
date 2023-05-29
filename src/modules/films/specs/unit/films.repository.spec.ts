@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FilmEntity } from '../../entities';
 import { FilmsRepository } from '../../films.repository';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { FilmGenreEnum } from '../../enums';
 import { TYPEORM_CONNECTION_NAME } from 'src/config/app-config.service';
 
 describe('FilmsRepository unit tests', () => {
@@ -11,7 +10,6 @@ describe('FilmsRepository unit tests', () => {
   const filmEntity = {
     id: '7e8c4c29-cd12-44b7-84aa-02f3e721f706',
     name: 'films repository test entity',
-    genre: FilmGenreEnum.ACTION,
     createdAt: new Date(),
     updatedAt: new Date(),
   } as FilmEntity;

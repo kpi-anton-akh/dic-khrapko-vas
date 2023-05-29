@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsEnum,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -11,7 +10,6 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { FilmGenreEnum } from '../enums';
 
 export class CreateFilmDto {
   @IsNotEmpty()
@@ -36,10 +34,6 @@ export class CreateFilmDto {
     required: false,
   })
   public readonly description?: string;
-
-  @IsEnum(FilmGenreEnum)
-  @ApiProperty({ enum: FilmGenreEnum, examples: FilmGenreEnum, required: true })
-  public readonly genre: FilmGenreEnum;
 
   @IsOptional()
   @MaxLength(256)

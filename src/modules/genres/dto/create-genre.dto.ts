@@ -7,7 +7,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class CreateFilmGenreDto {
+export class CreateGenreDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(2)

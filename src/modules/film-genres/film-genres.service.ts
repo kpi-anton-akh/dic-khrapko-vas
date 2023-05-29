@@ -1,61 +1,42 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
-import { FilmGenresRepository } from './film-genres.repository';
 import { FilmGenreEntity } from './film-genre.entity';
-import { ErrorMessageEnum } from 'src/common/enums';
+import { GenresService } from '../genres/genres.service';
+import { FilmsService } from '../films/films.service';
+import { BlobStorage } from 'src/systems/blob-storage/blob-storage';
 
 @Injectable()
 export class FilmGenresService {
-  constructor(private readonly filmGenresRepository: FilmGenresRepository) {}
+  constructor(
+    private readonly filmsService: FilmsService,
+    private readonly genresService: GenresService,
+    private readonly filmGenresStorage: BlobStorage,
+  ) {}
 
   public async createOne(
-    entity: Partial<FilmGenreEntity>,
+    filmId: string,
+    genreId: string,
   ): Promise<FilmGenreEntity> {
-    return this.filmGenresRepository.createOne(entity).catch(() => {
-      throw new BadRequestException(ErrorMessageEnum.INVALID_DATA);
-    });
+    await this.filmsService.findOne({ id: filmId });
+
+    await this.genresService.findOneById(genreId);
+
+    const relationFileName = `${filmId}_${genreId}`;
+
+    const exists = await this.filmGenresStorage.containsFileByName(
+      relationFileName,
+    );
+
+    if (!exists) {
+      await this.filmGenresStorage.putContent(relationFileName);
+    }
+
+    return new FilmGenreEntity(filmId, genreId);
   }
 
-  public async findAll(): Promise<FilmGenreEntity[]> {
-    return this.filmGenresRepository.findAll().catch(() => {
-      throw new NotFoundException(ErrorMessageEnum.FILM_GENRES_NOT_FOUND);
-    });
-  }
+  public async getGenresByFilmId(filmId: string): Promise<string[]> {
+    await this.filmsService.findOne({ id: filmId });
 
-  public async findOneById(id: string): Promise<FilmGenreEntity> {
-    return this.filmGenresRepository
-      .findOneById(id)
-      .then((entity) => {
-        if (entity) return entity;
-        throw new NotFoundException(ErrorMessageEnum.FILM_GENRE_NOT_FOUND);
-      })
-      .catch(() => {
-        throw new NotFoundException(ErrorMessageEnum.FILM_GENRE_NOT_FOUND);
-      });
-  }
-
-  public async updateOne(
-    id: string,
-    entity: Partial<FilmGenreEntity>,
-  ): Promise<FilmGenreEntity> {
-    const entityToUpdate = await this.findOneById(id);
-    const { id: entityId } = await this.filmGenresRepository
-      .updateOne(entityToUpdate, entity)
-      .catch(() => {
-        throw new BadRequestException(ErrorMessageEnum.INVALID_DATA);
-      });
-
-    return this.findOneById(entityId);
-  }
-
-  public async removeOne(id: string): Promise<FilmGenreEntity> {
-    const entityToDelete = await this.findOneById(id);
-    return this.filmGenresRepository.removeOne(entityToDelete).catch(() => {
-      throw new NotFoundException(ErrorMessageEnum.FILM_GENRE_NOT_FOUND);
-    });
+    return this.filmGenresStorage.findByFilm(filmId);
   }
 }

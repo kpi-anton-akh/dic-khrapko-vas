@@ -2,259 +2,164 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppConfigModule } from 'src/config';
-import { FilmGenresRepository } from 'src/modules/film-genres/film-genres.repository';
-import { FilmGenreEntity } from 'src/modules/film-genres/film-genre.entity';
+import { GenreEntity } from 'src/modules/genres/genre.entity';
+import { GenresService } from 'src/modules/genres/genres.service';
+import { BlobStorage } from 'src/systems/blob-storage/blob-storage';
+import { IBlobStorage } from 'src/systems/blob-storage/interfaces';
+import { FilmEntity } from 'src/modules/films/entities';
 import { FilmGenresController } from 'src/modules/film-genres/film-genres.controller';
 import { FilmGenresService } from 'src/modules/film-genres/film-genres.service';
-import {
-  CreateFilmGenreDto,
-  UpdateFilmGenreDto,
-} from 'src/modules/film-genres/dto';
+import { FilmGenreEntity } from 'src/modules/film-genres/film-genre.entity';
+import { SqlDatabaseModule } from 'src/systems/database';
+import { FilmsModule } from 'src/modules/films';
+import { TypeOrmModule, getConnectionToken } from '@nestjs/typeorm';
+import { TYPEORM_CONNECTION_NAME } from 'src/config/app-config.service';
+import { DataSource, Repository } from 'typeorm';
 
 describe('FilmGenresController endpoints tests', () => {
   let app: INestApplication;
-  let repository: FilmGenresRepository;
 
-  let mockEntities: FilmGenreEntity[] = [];
+  let sqlDbDataSource: DataSource;
+  let filmsRepositoryDbContext: Repository<FilmEntity>;
+  let filmGenresStorage: IBlobStorage;
 
-  const mockRepository = {
-    createOne: jest.fn(),
-    findAll: async (): Promise<FilmGenreEntity[]> => [...mockEntities],
-    findOneById: async (id: string): Promise<FilmGenreEntity> => {
-      return mockEntities.find((entity) => entity.id === id);
-    },
-    updateOne: async (
-      entityToUpdate: FilmGenreEntity,
-      entity: Partial<FilmGenreEntity>,
-    ): Promise<FilmGenreEntity> => {
-      const updatedEntity = { ...entityToUpdate, ...entity };
-      const entityIndex = mockEntities.findIndex(
-        (el) => el.id === updatedEntity.id,
-      );
-      mockEntities[entityIndex] = updatedEntity;
-      return updatedEntity;
-    },
-    removeOne: async (entity: FilmGenreEntity): Promise<FilmGenreEntity> => {
-      mockEntities = mockEntities.filter(
-        (mockEntity) => mockEntity.id !== entity.id,
-      );
-      return { ...entity, id: undefined };
-    },
+  let filmEntity: FilmEntity;
+  let mockGenreEntity: GenreEntity;
+  let mockFilmGenresIds: string[];
+
+  const mockGenresService: Partial<GenresService> = {
+    findOneById: async () => mockGenreEntity,
+  };
+  const mockFilmGenresStorage: jest.Mocked<IBlobStorage> = {
+    putContent: jest.fn(),
+    containsFileByName: jest.fn(),
+    findByFilm: jest.fn(),
   };
 
   beforeAll(async () => {
     const testingModule: TestingModule = await Test.createTestingModule({
-      imports: [AppConfigModule],
+      imports: [
+        TypeOrmModule.forFeature([FilmEntity], TYPEORM_CONNECTION_NAME),
+        AppConfigModule,
+        SqlDatabaseModule,
+        FilmsModule,
+      ],
       controllers: [FilmGenresController],
       providers: [
         FilmGenresService,
-        // Mocking FilmGenresRepository provider
         {
-          provide: FilmGenresRepository,
-          useValue: mockRepository,
+          provide: GenresService,
+          useValue: mockGenresService,
+        },
+        {
+          provide: BlobStorage,
+          useValue: mockFilmGenresStorage,
         },
       ],
     }).compile();
+    sqlDbDataSource = testingModule.get<DataSource>(
+      getConnectionToken(TYPEORM_CONNECTION_NAME),
+    );
+    filmsRepositoryDbContext = sqlDbDataSource.getRepository(FilmEntity);
 
-    repository = testingModule.get(FilmGenresRepository);
+    filmGenresStorage = testingModule.get(BlobStorage);
 
     app = testingModule.createNestApplication();
     await app.init();
   });
 
   afterAll(async () => {
+    await sqlDbDataSource.dropDatabase();
+    await sqlDbDataSource.destroy();
     await app.close();
   });
 
   beforeEach(async () => {
     jest.restoreAllMocks();
-    mockEntities = [
-      {
-        id: '645f44ecb80b43669541373b',
-        name: 'Action',
-        description:
-          'Film genre in which the protagonist is thrust into a series of events that typically involve violence and physical feats',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: '645f44f1148ac47c02472f63',
-        name: 'Horror',
-        description:
-          'Film genre intended to scare, shock, and thrill its audience',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: '645f44f66e619a2eb6db605d',
-        name: 'Drama',
-        description:
-          'Film genre that relies on the emotional and relational development of realistic characters',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ] as FilmGenreEntity[];
+
+    filmEntity = {
+      id: 'a2ad9e79-2e67-44ea-8eb6-6d3ea756a624',
+      name: 'The Godfather',
+      description:
+        'Don Vito Corleone, head of a mafia family, decides to hand over his empire to his youngest son Michael. However, his decision unintentionally puts the lives of his loved ones in grave danger',
+      authorsNamesInfo: 'James Cameron',
+      rating: 9.99,
+      releaseYear: 1972,
+    } as FilmEntity;
+    await filmsRepositoryDbContext.insert(filmEntity);
+
+    mockGenreEntity = {
+      id: '646e37459e107559d0097990',
+      name: 'Fantasy',
+      description:
+        'Genre of speculative fiction involving magical elements, typically set in a fictional universe',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as GenreEntity;
+
+    mockFilmGenresIds = [
+      '646e383b54397ec29b498ce5',
+      '646e384112b0b4d8adb278bc',
+      '646e3847a7aad72b0798c981',
+    ];
+  });
+
+  afterEach(async () => {
+    await sqlDbDataSource.synchronize(true);
   });
 
   describe('createOne', () => {
-    it('should receive created FilmGenreEntity', async () => {
+    it('should receive FilmGenreEntity and call filmGenresStorage.putContent() method', async () => {
       // Arrange
-      const createFilmGenreDto = {
-        name: 'Comedy',
-        description: 'Comedy film is a genre of film which emphasizes humor',
-      } as CreateFilmGenreDto;
-      const entitiesBefore = await repository.findAll();
+      const filmId = filmEntity.id;
+      const mockGenreId = mockGenreEntity.id;
+      const expected = {
+        filmId: filmId,
+        genreId: mockGenreId,
+      } as FilmGenreEntity;
+      const expectedCallWith = `${filmId}_${mockGenreId}`;
+
       jest
-        .spyOn(repository, 'createOne')
-        .mockImplementation(async (entity): Promise<FilmGenreEntity> => {
-          const createdEntity = {
-            ...entity,
-            id: '645f5fd4906e033bd3ad2218',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          } as FilmGenreEntity;
-          mockEntities.push(createdEntity);
-          return createdEntity;
-        });
+        .spyOn(filmGenresStorage, 'containsFileByName')
+        .mockResolvedValue(false);
+      jest.spyOn(filmGenresStorage, 'putContent').mockResolvedValue();
 
       // Act
       const response = await request(app.getHttpServer())
-        .post('/film-genres')
-        .send(createFilmGenreDto)
+        .post(`/film-genres/${filmId}/genres/${mockGenreId}`)
         .expect(201);
 
       // Assert
       const received: FilmGenreEntity = response.body;
-      const entitiesAfter = await repository.findAll();
-      const expectedEntitiesAfter = entitiesAfter.map((entity) => ({
-        ...entity,
-        createdAt: entity.createdAt.toISOString(),
-        updatedAt: entity.updatedAt.toISOString(),
-      }));
-
-      expect(received).toBeDefined();
-      expect(received).toMatchObject(createFilmGenreDto);
-      expect(received).toHaveProperty('id');
-      expect(expectedEntitiesAfter).toContainEqual(received);
-      expect(expectedEntitiesAfter.length).toBe(entitiesBefore.length + 1);
-    });
-  });
-
-  describe('findAll', () => {
-    it('should receive an array of FilmGenreEntities', async () => {
-      // Arrange
-      const entitiesInDb = await repository.findAll();
-      const expectedEntitiesInDb = entitiesInDb.map((entity) => ({
-        ...entity,
-        createdAt: entity.createdAt.toISOString(),
-        updatedAt: entity.updatedAt.toISOString(),
-      }));
-
-      // Act
-      const response = await request(app.getHttpServer())
-        .get('/film-genres')
-        .expect(200);
-
-      // Assert
-      const received: FilmGenreEntity[] = response.body;
-      expect(received).toBeDefined();
-      expect(received.length).toBe(expectedEntitiesInDb.length);
-      expect(received).toEqual(expect.arrayContaining(expectedEntitiesInDb));
-    });
-  });
-
-  describe('findOneById', () => {
-    it('should receive a FilmGenreEntity by its id', async () => {
-      // Arrange
-      const entityId = '645f44ecb80b43669541373b';
-      const expectedEntity = await repository.findOneById(entityId);
-      const expected = {
-        ...expectedEntity,
-        createdAt: expectedEntity.createdAt.toISOString(),
-        updatedAt: expectedEntity.updatedAt.toISOString(),
-      } as unknown as FilmGenreEntity;
-
-      // Act
-      const response = await request(app.getHttpServer())
-        .get(`/film-genres/${entityId}`)
-        .expect(200);
-
-      // Assert
-      const received = response.body;
-      expect(received).toBeDefined();
-      expect(received).toEqual(expected);
-    });
-  });
-
-  describe('updateOne', () => {
-    it('should receive updated FilmGenreEntity', async () => {
-      // Arrange
-      const updateFilmGenreDto = {
-        name: 'Updated test film genre name',
-      } as UpdateFilmGenreDto;
-      const entityId = '645f44ecb80b43669541373b';
-      const entitiesBefore = await repository.findAll();
-
-      // Act
-      const response = await request(app.getHttpServer())
-        .patch(`/film-genres/${entityId}`)
-        .send(updateFilmGenreDto)
-        .expect(200);
-
-      // Assert
-      const received: FilmGenreEntity = response.body;
-      const expectedEntity = await repository.findOneById(entityId);
-      const expected = {
-        ...expectedEntity,
-        createdAt: expectedEntity.createdAt.toISOString(),
-        updatedAt: expectedEntity.updatedAt.toISOString(),
-      } as unknown as FilmGenreEntity;
-      const entitiesAfter = await repository.findAll();
-      const expectedEntitiesAfter = entitiesAfter.map((entity) => ({
-        ...entity,
-        createdAt: entity.createdAt.toISOString(),
-        updatedAt: entity.updatedAt.toISOString(),
-      }));
 
       expect(received).toBeDefined();
       expect(received).toEqual(expected);
-      expect(received).toMatchObject(updateFilmGenreDto);
-      expect(expectedEntitiesAfter).toContainEqual(received);
-      expect(expectedEntitiesAfter.length).toBe(entitiesBefore.length);
+      expect(filmGenresStorage.putContent).toHaveBeenCalledTimes(1);
+      expect(filmGenresStorage.putContent).toHaveBeenCalledWith(
+        expectedCallWith,
+      );
     });
   });
 
-  describe('removeOne', () => {
-    it('should receive removed FilmGenreEntity', async () => {
+  describe('getGenresByFilmId', () => {
+    it('should receive an array of film genres ids', async () => {
       // Arrange
-      const entityId = '645f44ecb80b43669541373b';
-      const entitiesBefore = await repository.findAll();
-      const expectedEntity = await repository.findOneById(entityId);
-      const expected = {
-        ...expectedEntity,
-        createdAt: expectedEntity.createdAt.toISOString(),
-        updatedAt: expectedEntity.updatedAt.toISOString(),
-      } as unknown as FilmGenreEntity;
+      const expected = mockFilmGenresIds;
+      const filmId = filmEntity.id;
+      jest
+        .spyOn(filmGenresStorage, 'findByFilm')
+        .mockResolvedValue(mockFilmGenresIds);
 
       // Act
       const response = await request(app.getHttpServer())
-        .delete(`/film-genres/${entityId}`)
+        .get(`/film-genres/${filmId}/genres`)
         .expect(200);
 
       // Assert
-      const received: FilmGenreEntity = response.body;
-      const entitiesAfter = await repository.findAll();
-      const expectedEntitiesAfter = entitiesAfter.map((entity) => ({
-        ...entity,
-        createdAt: entity.createdAt.toISOString(),
-        updatedAt: entity.updatedAt.toISOString(),
-      }));
-
+      const received: string[] = response.body;
       expect(received).toBeDefined();
-      expect(received).not.toHaveProperty('id');
-      expect(expected).toMatchObject(received);
-      expect(expectedEntitiesAfter).not.toContain(received);
-      expect(expectedEntitiesAfter.length).toBe(entitiesBefore.length - 1);
+      expect(received.length).toBe(expected.length);
+      expect(received).toEqual(expect.arrayContaining(expected));
     });
   });
 });

@@ -1,194 +1,177 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FilmGenresService } from '../../film-genres.service';
-import { FilmGenresRepository } from '../../film-genres.repository';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { ErrorMessageEnum } from 'src/common/enums';
 import { FilmGenreEntity } from '../../film-genre.entity';
+import { IBlobStorage } from 'src/systems/blob-storage/interfaces';
+import { BlobStorage } from 'src/systems/blob-storage/blob-storage';
+import { FilmsService } from 'src/modules/films/films.service';
+import { GenresService } from 'src/modules/genres/genres.service';
+import { FilmEntity } from 'src/modules/films/entities';
+import { GenreEntity } from 'src/modules/genres/genre.entity';
+import { NotFoundException } from '@nestjs/common';
+import { ErrorMessageEnum } from 'src/common/enums';
 
 describe('FilmGenresService unit tests', () => {
-  let repository: FilmGenresRepository;
   let service: FilmGenresService;
 
+  const filmId = '4dbd84e5-0334-47b4-aca5-d8766084953a';
+  const genreId = '646e6f883c8a9c0fe11971d5';
   const filmGenreEntity = {
-    id: '645f3cd9c1635ae1fe9c92e4',
-    name: 'film genres service test entity name',
-    desciption: 'film genres service test entity description',
+    filmId,
+    genreId,
+  } as FilmGenreEntity;
+  const mockFilmGenresIds = [
+    '646e6f76517363f12a9e406d',
+    '646e6f7c595bbe9414a4bd6d',
+    '646e6f7f4958ddac9db228b7',
+  ];
+
+  const mockFilm: FilmEntity = {
+    id: filmId,
+    name: 'Test film genres service film name',
     createdAt: new Date(),
     updatedAt: new Date(),
-  } as FilmGenreEntity;
+  };
+  const mockGenre: GenreEntity = {
+    id: genreId,
+    name: 'film genres service genre name',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const mockFilmGenresStorage: jest.Mocked<IBlobStorage> = {
+    putContent: jest.fn(),
+    containsFileByName: jest.fn(),
+    findByFilm: jest.fn(),
+  };
+
+  const mockFilmsService: Partial<FilmsService> = {
+    findOne: async () => mockFilm,
+  };
+  const mockGenresService: Partial<GenresService> = {
+    findOneById: async () => mockGenre,
+  };
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FilmGenresService,
-        // Mocking FilmGenresRepository provider
         {
-          provide: FilmGenresRepository,
-          useValue: {
-            createOne: async () => filmGenreEntity,
-            findAll: async () => [filmGenreEntity],
-            findOneById: async () => filmGenreEntity,
-            updateOne: async () => filmGenreEntity,
-            removeOne: async () => new FilmGenreEntity(),
-          },
+          provide: BlobStorage,
+          useValue: mockFilmGenresStorage,
+        },
+        {
+          provide: FilmsService,
+          useValue: mockFilmsService,
+        },
+        {
+          provide: GenresService,
+          useValue: mockGenresService,
         },
       ],
     }).compile();
 
     service = module.get<FilmGenresService>(FilmGenresService);
-    repository = module.get<FilmGenresRepository>(FilmGenresRepository);
   });
 
-  afterEach(() => {
+  beforeEach(async () => {
     jest.resetAllMocks();
   });
 
-  it('should be defined', () => {
+  it('service should be defined', () => {
     expect(service).toBeDefined();
   });
 
   describe('createOne', () => {
-    it('should return created FilmGenreEntity', async () => {
-      const received = await service.createOne(filmGenreEntity);
+    it('should receive FilmGenreEntity when storage does not contain specified file', async () => {
+      jest
+        .spyOn(mockFilmGenresStorage, 'containsFileByName')
+        .mockResolvedValue(false);
+      jest.spyOn(mockFilmGenresStorage, 'putContent').mockResolvedValue();
+
+      const received = await service.createOne(filmId, genreId);
 
       expect(received).toEqual(filmGenreEntity);
-    });
-
-    it('should throw BadRequestException if an error occurs when repository creates new entity', async () => {
-      jest.spyOn(repository, 'createOne').mockRejectedValue(new Error());
-      const error = new BadRequestException(ErrorMessageEnum.INVALID_DATA);
-
-      await expect(() => service.createOne(filmGenreEntity)).rejects.toThrow(
-        error,
-      );
-      await expect(() => service.createOne(filmGenreEntity)).rejects.toThrow(
-        BadRequestException,
+      expect(mockFilmGenresStorage.putContent).toHaveBeenCalledTimes(1);
+      expect(mockFilmGenresStorage.putContent).toHaveBeenCalledWith(
+        `${filmId}_${genreId}`,
       );
     });
-  });
 
-  describe('findAll', () => {
-    it('should return array of found FilmGenreEntities', async () => {
-      const expected = [filmGenreEntity];
+    it('should receive FilmGenreEntity when storage contains specified file', async () => {
+      jest
+        .spyOn(mockFilmGenresStorage, 'containsFileByName')
+        .mockResolvedValue(true);
+      jest.spyOn(mockFilmGenresStorage, 'putContent').mockResolvedValue();
 
-      const received = await service.findAll();
-
-      expect(Array.isArray(received)).toBe(true);
-      expect(received).toEqual(expected);
-    });
-
-    it('should throw NotFoundException if an error occurs when repository find all entities', async () => {
-      jest.spyOn(repository, 'findAll').mockRejectedValue(new Error());
-      const error = new NotFoundException(
-        ErrorMessageEnum.FILM_GENRES_NOT_FOUND,
-      );
-
-      await expect(() => service.findAll()).rejects.toThrow(error);
-      await expect(() => service.findAll()).rejects.toThrow(NotFoundException);
-    });
-  });
-
-  describe('findOneById', () => {
-    it('should return found FilmGenreEntity', async () => {
-      const received = await service.findOneById(filmGenreEntity.id);
+      const received = await service.createOne(filmId, genreId);
 
       expect(received).toEqual(filmGenreEntity);
+      expect(mockFilmGenresStorage.putContent).not.toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException if repository find one entity by id returns null value (entity not found in database)', async () => {
-      jest.spyOn(repository, 'findOneById').mockResolvedValue(null);
-      const error = new NotFoundException(
-        ErrorMessageEnum.FILM_GENRE_NOT_FOUND,
+    it('should throw NotFoundException if film with specified id not found in database', async () => {
+      const expectedError = new NotFoundException(
+        ErrorMessageEnum.FILM_NOT_FOUND,
       );
+      jest
+        .spyOn(mockFilmGenresStorage, 'containsFileByName')
+        .mockResolvedValue(false);
+      jest.spyOn(mockFilmsService, 'findOne').mockRejectedValue(expectedError);
 
-      await expect(() =>
-        service.findOneById(filmGenreEntity.id),
-      ).rejects.toThrow(error);
-      await expect(() =>
-        service.findOneById(filmGenreEntity.id),
-      ).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw NotFoundException if an error occurs when repository find one entity', async () => {
-      jest.spyOn(repository, 'findOneById').mockRejectedValue(new Error());
-      const error = new NotFoundException(
-        ErrorMessageEnum.FILM_GENRE_NOT_FOUND,
+      await expect(() => service.createOne(filmId, genreId)).rejects.toThrow(
+        expectedError,
       );
-
-      await expect(() =>
-        service.findOneById(filmGenreEntity.id),
-      ).rejects.toThrow(error);
-      await expect(() =>
-        service.findOneById(filmGenreEntity.id),
-      ).rejects.toThrow(NotFoundException);
-    });
-  });
-
-  describe('updateOne', () => {
-    it('should return updated FilmGenreEntity', async () => {
-      const received = await service.updateOne(filmGenreEntity.id, {});
-
-      expect(received).toEqual(filmGenreEntity);
-    });
-
-    it('should throw NotFoundException if entity to update not found in database', async () => {
-      const error = new NotFoundException(
-        ErrorMessageEnum.FILM_GENRE_NOT_FOUND,
-      );
-      jest.spyOn(service, 'findOneById').mockRejectedValue(error);
-
-      await expect(() =>
-        service.updateOne(filmGenreEntity.id, {}),
-      ).rejects.toThrow(error);
-      await expect(() =>
-        service.updateOne(filmGenreEntity.id, {}),
-      ).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw BadRequestException if an error occurs when repository updates entity', async () => {
-      jest.spyOn(repository, 'updateOne').mockRejectedValue(new Error());
-      const error = new BadRequestException(ErrorMessageEnum.INVALID_DATA);
-
-      await expect(() =>
-        service.updateOne(filmGenreEntity.id, {}),
-      ).rejects.toThrow(error);
-      await expect(() =>
-        service.updateOne(filmGenreEntity.id, {}),
-      ).rejects.toThrow(BadRequestException);
-    });
-  });
-
-  describe('removeOne', () => {
-    it('should return removed FilmGenreEntity', async () => {
-      const received = await service.removeOne(filmGenreEntity.id);
-
-      expect(received).toBeInstanceOf(FilmGenreEntity);
-    });
-
-    it('should throw NotFoundException if entity to remove not found in database', async () => {
-      const error = new NotFoundException(
-        ErrorMessageEnum.FILM_GENRE_NOT_FOUND,
-      );
-      jest.spyOn(service, 'findOneById').mockRejectedValue(error);
-
-      await expect(() => service.removeOne(filmGenreEntity.id)).rejects.toThrow(
-        error,
-      );
-      await expect(() => service.removeOne(filmGenreEntity.id)).rejects.toThrow(
+      await expect(() => service.createOne(filmId, genreId)).rejects.toThrow(
         NotFoundException,
       );
     });
 
-    it('should throw NotFoundException if an error occurs when repository removes entity', async () => {
-      jest.spyOn(repository, 'removeOne').mockRejectedValue(new Error());
-      const error = new NotFoundException(
-        ErrorMessageEnum.FILM_GENRE_NOT_FOUND,
+    it('should throw NotFoundException if genre with specified id not found in database', async () => {
+      const expectedError = new NotFoundException(
+        ErrorMessageEnum.GENRE_NOT_FOUND,
       );
+      jest
+        .spyOn(mockFilmGenresStorage, 'containsFileByName')
+        .mockResolvedValue(false);
+      jest
+        .spyOn(mockGenresService, 'findOneById')
+        .mockRejectedValue(expectedError);
 
-      await expect(() => service.removeOne(filmGenreEntity.id)).rejects.toThrow(
-        error,
+      await expect(() => service.createOne(filmId, genreId)).rejects.toThrow(
+        expectedError,
       );
-      await expect(() => service.removeOne(filmGenreEntity.id)).rejects.toThrow(
+      await expect(() => service.createOne(filmId, genreId)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('getGenresByFilmId', () => {
+    it('should receive an array of film genres ids', async () => {
+      jest
+        .spyOn(mockFilmGenresStorage, 'findByFilm')
+        .mockResolvedValue(mockFilmGenresIds);
+
+      const received = await service.getGenresByFilmId(filmId);
+
+      expect(Array.isArray(received)).toBeTruthy();
+      expect(received.length).toBe(mockFilmGenresIds.length);
+      expect(received).toEqual(expect.arrayContaining(mockFilmGenresIds));
+    });
+
+    it('should throw NotFoundException if film with specified id not found in database', async () => {
+      const expectedError = new NotFoundException(
+        ErrorMessageEnum.FILM_NOT_FOUND,
+      );
+      jest
+        .spyOn(mockFilmGenresStorage, 'findByFilm')
+        .mockResolvedValue(mockFilmGenresIds);
+      jest.spyOn(mockFilmsService, 'findOne').mockRejectedValue(expectedError);
+
+      await expect(() => service.getGenresByFilmId(filmId)).rejects.toThrow(
+        expectedError,
+      );
+      await expect(() => service.getGenresByFilmId(filmId)).rejects.toThrow(
         NotFoundException,
       );
     });

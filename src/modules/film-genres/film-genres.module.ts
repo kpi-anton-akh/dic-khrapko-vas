@@ -1,17 +1,32 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { FilmGenreEntity } from './film-genre.entity';
+import { GenresModule } from '../genres';
+import { FilmsModule } from '../films';
 import { FilmGenresController } from './film-genres.controller';
-import { FilmGenresRepository } from './film-genres.repository';
 import { FilmGenresService } from './film-genres.service';
-import { TYPEORM_CONNECTION_NAME_NOSQL } from 'src/config/app-config.service';
+import { BlobStorage } from 'src/systems/blob-storage/blob-storage';
+import { AppConfigService } from 'src/config/app-config.service';
+import { FILM_GENRES_CONTAINER_NAME } from 'src/common/constants';
+import { AppConfigModule } from 'src/config';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([FilmGenreEntity], TYPEORM_CONNECTION_NAME_NOSQL),
-  ],
+  imports: [FilmsModule, GenresModule, AppConfigModule],
   controllers: [FilmGenresController],
-  providers: [FilmGenresService, FilmGenresRepository],
+  providers: [
+    FilmGenresService,
+    {
+      provide: BlobStorage,
+      useFactory: (appConfigService: AppConfigService) =>
+        new BlobStorage(
+          {
+            connectionString: appConfigService.get<string>(
+              'AZURE_BLOB_CONNECTION_STRING',
+            ),
+          },
+          FILM_GENRES_CONTAINER_NAME,
+        ),
+      inject: [AppConfigService],
+    },
+  ],
   exports: [FilmGenresService],
 })
 export class FilmGenresModule {}

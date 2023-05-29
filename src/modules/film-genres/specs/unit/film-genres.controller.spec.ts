@@ -1,35 +1,33 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FilmGenresController } from '../../film-genres.controller';
 import { FilmGenresService } from '../../film-genres.service';
-import { CreateFilmGenreDto, UpdateFilmGenreDto } from '../../dto';
 import { FilmGenreEntity } from '../../film-genre.entity';
 
 describe('FilmGenresController unit tests', () => {
   let controller: FilmGenresController;
 
-  const createOneDto = new CreateFilmGenreDto();
-  const updateOneDto = new UpdateFilmGenreDto();
+  const filmId = '7f689cda-1eab-4c59-b123-c1f1aafc4d10';
+  const genreId = '646e4e82fbeb3b02846e14c9';
   const filmGenreEntity = {
-    id: '645ea97f857f8bfa3377fd1e',
-    name: 'film genres controller test entity name',
-    desciption: 'film genres controller test entity description',
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    filmId,
+    genreId,
   } as FilmGenreEntity;
+  const filmGenresIds = [
+    '646e4ed558c8aa19e17fdc40',
+    '646e4edbfc4b6d6e5a441575',
+    '646e4ee0d053e75a764e7944',
+  ];
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [FilmGenresController],
-      // Mocking FilmGenresService provider
+      // Mocking FilmGenres provider
       providers: [
         {
           provide: FilmGenresService,
           useValue: {
             createOne: async () => filmGenreEntity,
-            findAll: async () => [filmGenreEntity],
-            findOneById: async () => filmGenreEntity,
-            updateOne: async () => filmGenreEntity,
-            removeOne: async () => new FilmGenreEntity(),
+            getGenresByFilmId: async () => filmGenresIds,
           },
         },
       ],
@@ -43,47 +41,20 @@ describe('FilmGenresController unit tests', () => {
   });
 
   describe('createOne', () => {
-    it('should return created FilmGenreEntity', async () => {
-      const received = await controller.createOne(createOneDto);
+    it('should receive created FilmGenreEntity', async () => {
+      const received = await controller.createOne(filmId, genreId);
 
       expect(received).toEqual(filmGenreEntity);
     });
   });
 
-  describe('findAll', () => {
-    it('should return array of found FilmGenreEntities', async () => {
-      const expected = [filmGenreEntity];
+  describe('getGenresByFilmId', () => {
+    it('should receive an array of film genres ids', async () => {
+      const received = await controller.getGenresByFilmId(filmId);
 
-      const received = await controller.findAll();
-
-      expect(Array.isArray(received)).toBe(true);
-      expect(received).toEqual(expected);
-    });
-  });
-
-  describe('findOneById', () => {
-    it('should return found FilmGenreEntity', async () => {
-      const received = await controller.findOneById({ id: filmGenreEntity.id });
-
-      expect(received).toEqual(filmGenreEntity);
-    });
-  });
-
-  describe('updateOne', () => {
-    it('should return updated FilmGenreEntity', async () => {
-      const received = await controller.updateOne(
-        { id: filmGenreEntity.id },
-        updateOneDto,
-      );
-
-      expect(received).toEqual(filmGenreEntity);
-    });
-  });
-
-  describe('removeOne', () => {
-    it('should return removed FilmGenreEntity', async () => {
-      const received = await controller.removeOne({ id: filmGenreEntity.id });
-      expect(received).toBeInstanceOf(FilmGenreEntity);
+      expect(Array.isArray(received)).toBeTruthy();
+      expect(received.length).toBe(filmGenresIds.length);
+      expect(received).toEqual(expect.arrayContaining(filmGenresIds));
     });
   });
 });
