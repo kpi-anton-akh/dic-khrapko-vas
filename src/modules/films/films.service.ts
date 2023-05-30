@@ -8,15 +8,25 @@ import { FilmsRepository } from './films.repository';
 import { FilmEntity } from './entities';
 import { ErrorMessageEnum } from 'src/common/enums';
 import { IFindConditions } from 'src/common/interfaces';
+import { FilmStatsPublisher } from 'src/systems/service-bus/film-stats.publisher';
 
 @Injectable()
 export class FilmsService {
-  constructor(private readonly filmsRepository: FilmsRepository) {}
+  constructor(
+    private readonly filmsRepository: FilmsRepository,
+    private readonly filmStatsPublisher: FilmStatsPublisher,
+  ) {}
 
   public async createOne(entity: Partial<FilmEntity>): Promise<FilmEntity> {
-    return this.filmsRepository.createOne(entity).catch(() => {
-      throw new BadRequestException(ErrorMessageEnum.INVALID_DATA);
-    });
+    const createdEntity = await this.filmsRepository
+      .createOne(entity)
+      .catch(() => {
+        throw new BadRequestException(ErrorMessageEnum.INVALID_DATA);
+      });
+
+    await this.filmStatsPublisher.publish(createdEntity.id);
+
+    return createdEntity;
   }
 
   public async findAll(): Promise<FilmEntity[]> {
