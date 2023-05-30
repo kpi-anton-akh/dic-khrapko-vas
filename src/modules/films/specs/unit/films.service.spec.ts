@@ -4,10 +4,18 @@ import { FilmEntity } from '../../entities';
 import { FilmsRepository } from '../../films.repository';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ErrorMessageEnum } from 'src/common/enums';
+import { FilmStatsPublisher } from 'src/systems/service-bus/film-stats.publisher';
 
 describe('FilmsService unit tests', () => {
   let repository: FilmsRepository;
   let service: FilmsService;
+
+  let filmStatsPublisher: FilmStatsPublisher;
+  const mockFilmStatsPublisher: Partial<FilmStatsPublisher> = {
+    publish: async () => {
+      return;
+    },
+  };
 
   const filmEntity = {
     id: '61b37c40-3f0b-4bee-8aae-5a03fdef9faa',
@@ -31,11 +39,13 @@ describe('FilmsService unit tests', () => {
             removeOne: async () => new FilmEntity(),
           },
         },
+        { provide: FilmStatsPublisher, useValue: mockFilmStatsPublisher },
       ],
     }).compile();
 
     service = module.get<FilmsService>(FilmsService);
     repository = module.get<FilmsRepository>(FilmsRepository);
+    filmStatsPublisher = module.get(FilmStatsPublisher);
   });
 
   afterEach(() => {
@@ -51,6 +61,14 @@ describe('FilmsService unit tests', () => {
       const received = await service.createOne(filmEntity);
 
       expect(received).toEqual(filmEntity);
+    });
+
+    it('should call filmStatsPublisher.publish() method while creating FilmEntity', async () => {
+      jest.spyOn(filmStatsPublisher, 'publish').mockResolvedValue();
+
+      await service.createOne(filmEntity);
+
+      expect(filmStatsPublisher.publish).toHaveBeenCalledTimes(1);
     });
 
     it('should throw BadRequestException if an error occurs when repository creates new entity', async () => {
