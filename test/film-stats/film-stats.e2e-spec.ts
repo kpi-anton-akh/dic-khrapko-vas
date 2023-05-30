@@ -24,8 +24,6 @@ describe('FilmStatsController endpoints tests', () => {
       providers: [
         FilmStatsService,
         { provide: FilmStatsSubscriber, useValue: mockFilmStatsSubscriber },
-        { provide: ServiceBusClient, useValue: {} },
-        { provide: SERVICE_BUS_QUEUE_NAME_TOKEN, useValue: '' },
       ],
     }).compile();
 
