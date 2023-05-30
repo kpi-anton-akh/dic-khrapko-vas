@@ -1,11 +1,9 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
-import { ServiceBusClient } from '@azure/service-bus';
 import { FilmStatsSubscriber } from 'src/systems/service-bus/film-stats.subscriber';
 import { FilmStatsController } from 'src/modules/film-stats/film-stats.controller';
 import { FilmStatsService } from 'src/modules/film-stats/film-stats.service';
-import { SERVICE_BUS_QUEUE_NAME_TOKEN } from 'src/common/constants';
 
 describe('FilmStatsController endpoints tests', () => {
   let app: INestApplication;
