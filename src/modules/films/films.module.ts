@@ -5,9 +5,13 @@ import { FilmsController } from './films.controller';
 import { FilmsRepository } from './films.repository';
 import { FilmsService } from './films.service';
 import { TYPEORM_CONNECTION_NAME } from 'src/config/app-config.service';
+import { FilmStatsModule } from '../film-stats';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([FilmEntity], TYPEORM_CONNECTION_NAME)],
+  imports: [
+    TypeOrmModule.forFeature([FilmEntity], TYPEORM_CONNECTION_NAME),
+    FilmStatsModule,
+  ],
   controllers: [FilmsController],
   providers: [FilmsService, FilmsRepository],
   exports: [FilmsService],

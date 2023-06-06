@@ -8,6 +8,17 @@ import { AppModule } from './app.module';
 import { convertBoolStrToBoolean } from './common/helpers';
 import { validationPipe } from './common/pipes';
 import { AppConfigService } from './config/app-config.service';
+import { FilmStatsModule } from './modules/film-stats';
+import { FilmStatsSubscriber } from './systems/service-bus/film-stats.subscriber';
+import { INestApplication } from '@nestjs/common';
+
+const configureEdgeService = async (app: INestApplication) => {
+  const filmStatsSubscriber = app
+    .select(FilmStatsModule)
+    .get(FilmStatsSubscriber);
+
+  await filmStatsSubscriber.subscribe();
+};
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -36,6 +47,8 @@ async function bootstrap() {
   }
 
   app.useGlobalPipes(validationPipe).enableCors();
+
+  await configureEdgeService(app);
 
   await app.listen(PORT, HOST, () => {
     console.log(`Server listens on http://${HOST}:${PORT}`);

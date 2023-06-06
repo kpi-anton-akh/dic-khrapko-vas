@@ -11,10 +11,13 @@ import { FilmGenresController } from 'src/modules/film-genres/film-genres.contro
 import { FilmGenresService } from 'src/modules/film-genres/film-genres.service';
 import { FilmGenreEntity } from 'src/modules/film-genres/film-genre.entity';
 import { SqlDatabaseModule } from 'src/systems/database';
-import { FilmsModule } from 'src/modules/films';
 import { TypeOrmModule, getConnectionToken } from '@nestjs/typeorm';
 import { TYPEORM_CONNECTION_NAME } from 'src/config/app-config.service';
 import { DataSource, Repository } from 'typeorm';
+import { FilmsController } from 'src/modules/films/films.controller';
+import { FilmsService } from 'src/modules/films/films.service';
+import { FilmsRepository } from 'src/modules/films/films.repository';
+import { FilmStatsPublisher } from 'src/systems/service-bus/film-stats.publisher';
 
 describe('FilmGenresController endpoints tests', () => {
   let app: INestApplication;
@@ -27,6 +30,11 @@ describe('FilmGenresController endpoints tests', () => {
   let mockGenreEntity: GenreEntity;
   let mockFilmGenresIds: string[];
 
+  const mockFilmStatsPublisher: Partial<FilmStatsPublisher> = {
+    publish: async () => {
+      return;
+    },
+  };
   const mockGenresService: Partial<GenresService> = {
     findOneById: async () => mockGenreEntity,
   };
@@ -42,10 +50,12 @@ describe('FilmGenresController endpoints tests', () => {
         TypeOrmModule.forFeature([FilmEntity], TYPEORM_CONNECTION_NAME),
         AppConfigModule,
         SqlDatabaseModule,
-        FilmsModule,
       ],
-      controllers: [FilmGenresController],
+      controllers: [FilmGenresController, FilmsController],
       providers: [
+        FilmsService,
+        { provide: FilmStatsPublisher, useValue: mockFilmStatsPublisher },
+        FilmsRepository,
         FilmGenresService,
         {
           provide: GenresService,

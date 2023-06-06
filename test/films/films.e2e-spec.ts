@@ -3,17 +3,25 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule, getConnectionToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { AppConfigModule } from 'src/config';
-import { FilmsModule } from 'src/modules/films';
 import { CreateFilmDto, UpdateFilmDto } from 'src/modules/films/dto';
 import { FilmEntity } from 'src/modules/films/entities';
 import { SqlDatabaseModule } from 'src/systems/database';
 import { DataSource, Repository } from 'typeorm';
 import { TYPEORM_CONNECTION_NAME } from 'src/config/app-config.service';
+import { FilmsController } from 'src/modules/films/films.controller';
+import { FilmsService } from 'src/modules/films/films.service';
+import { FilmsRepository } from 'src/modules/films/films.repository';
+import { FilmStatsPublisher } from 'src/systems/service-bus/film-stats.publisher';
 
 describe('FilmsController endpoints tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let dbContext: Repository<FilmEntity>;
+
+  let filmStatsPublisher: FilmStatsPublisher;
+  const mockFilmStatsPublisher: jest.Mocked<Partial<FilmStatsPublisher>> = {
+    publish: jest.fn(),
+  };
 
   beforeAll(async () => {
     const testingModule: TestingModule = await Test.createTestingModule({
@@ -21,7 +29,12 @@ describe('FilmsController endpoints tests', () => {
         TypeOrmModule.forFeature([FilmEntity], TYPEORM_CONNECTION_NAME),
         AppConfigModule,
         SqlDatabaseModule,
-        FilmsModule,
+      ],
+      controllers: [FilmsController],
+      providers: [
+        FilmsService,
+        FilmsRepository,
+        { provide: FilmStatsPublisher, useValue: mockFilmStatsPublisher },
       ],
     }).compile();
     dataSource = testingModule.get<DataSource>(
@@ -30,6 +43,7 @@ describe('FilmsController endpoints tests', () => {
 
     dbContext = dataSource.getRepository(FilmEntity);
 
+    filmStatsPublisher = testingModule.get(FilmStatsPublisher);
     app = testingModule.createNestApplication();
     await app.init();
   });
@@ -41,6 +55,8 @@ describe('FilmsController endpoints tests', () => {
   });
 
   beforeEach(async () => {
+    jest.restoreAllMocks();
+
     const entities = [
       {
         id: 'f914f58a-a336-42c8-b318-af2c4a7faa12',
@@ -81,6 +97,7 @@ describe('FilmsController endpoints tests', () => {
         releaseYear: 2023,
       } as CreateFilmDto;
       const entitiesBefore = await dbContext.find();
+      jest.spyOn(filmStatsPublisher, 'publish').mockResolvedValue();
 
       // Act
       const response = await request(app.getHttpServer())
@@ -102,6 +119,7 @@ describe('FilmsController endpoints tests', () => {
       expect(received).toHaveProperty('id');
       expect(expectedEntitiesAfter).toContainEqual(received);
       expect(expectedEntitiesAfter.length).toBe(entitiesBefore.length + 1);
+      expect(filmStatsPublisher.publish).toHaveBeenCalledTimes(1);
     });
   });
 
